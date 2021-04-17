@@ -74,12 +74,12 @@ int InitializeSeesaw(void)
 	{
 		if(readData[0] != SEESAW_HW_ID_CODE )
 		{
-			SerialConsoleWriteString("Error/r/n");
+			SerialConsoleWriteString("Error\r\n");
 			return 1;
 		}
 		else
 		{
-		SerialConsoleWriteString("Found Seesaw!/r/n");
+		SerialConsoleWriteString("Found Seesaw!\r\n");
 		}
 	}
 
@@ -90,7 +90,7 @@ int InitializeSeesaw(void)
 	error = I2cWriteDataWait(&seesawData, 100);
 	if(ERROR_NONE != error)
 	{
-		SerialConsoleWriteString("Could not write Seesaw pin!/r/n");
+		SerialConsoleWriteString("Could not write Seesaw pin!\r\n");
 	}
 
 	//Set seesaw Neopixel speed

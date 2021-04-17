@@ -246,29 +246,31 @@ static uint8_t pcEscapeCodePos = 0;
 //Example CLI Command. Reads from the IMU and returns data.
 BaseType_t CLI_GetImuData( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString )
 {
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static float acceleration_mg[3];
-uint8_t reg;
+	static axis3bit16_t data_raw_acceleration;
+	static axis3bit16_t data_raw_angular_rate;
+	static float acceleration_mg[3];
+	uint8_t reg;
 
-lsm6ds3_xl_flag_data_ready_get(GetImuStruct(), &reg);
-if(reg){
-	memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-	lsm6ds3_acceleration_raw_get(GetImuStruct(), data_raw_acceleration.u8bit);
-	acceleration_mg[0] =
-	lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
-	acceleration_mg[1] =
-	lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
-	acceleration_mg[2] =
-	lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+	lsm6ds3_xl_flag_data_ready_get(GetImuStruct(), &reg);
+	if(reg)
+	{
+		memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+		lsm6ds3_acceleration_raw_get(GetImuStruct(), data_raw_acceleration.u8bit);
+		acceleration_mg[0] =
+		lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+		acceleration_mg[1] =
+		lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+		acceleration_mg[2] =
+		lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
-snprintf(pcWriteBuffer,xWriteBufferLen, "Acceleration [mg]:X %d\tY %d\t%Z %d\r\n",
-(int)acceleration_mg[0], (int)acceleration_mg[1], (int)acceleration_mg[2]);
-}else
-{
-	snprintf(pcWriteBuffer,xWriteBufferLen, "No data ready! \r\n");
-}
-return pdFALSE;
+		snprintf(pcWriteBuffer,xWriteBufferLen, "Acceleration [mg]:X %d\tY %d\t%Z %d\r\n",
+		(int)acceleration_mg[0], (int)acceleration_mg[1], (int)acceleration_mg[2]);
+	}
+	else
+	{
+		snprintf(pcWriteBuffer,xWriteBufferLen, "No data ready! \r\n");
+	}
+	return pdFALSE;
 }
 
 
@@ -308,8 +310,8 @@ Example 3
 *****************************************************************************/
 BaseType_t CLI_NeotrellisSetLed( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString )
 {
-	int8_t *pcParameter1, *pcParameter2, *pcParameter3, *pcParameter4;
-	BaseType_t xParameter1StringLength, xParameter2StringLength, xParameter3StringLength, xParameter4StringLength;
+	static int8_t *pcParameter1, *pcParameter2, *pcParameter3, *pcParameter4;
+	static BaseType_t xParameter1StringLength, xParameter2StringLength, xParameter3StringLength, xParameter4StringLength;
 	pcParameter1 = FreeRTOS_CLIGetParameter(pcCommandString,1,&xParameter1StringLength);
 	pcParameter2 = FreeRTOS_CLIGetParameter(pcCommandString,2,&xParameter2StringLength);
 	pcParameter3 = FreeRTOS_CLIGetParameter(pcCommandString,3,&xParameter3StringLength);
@@ -343,8 +345,9 @@ BaseType_t CLI_NeotrellisSetLed( int8_t *pcWriteBuffer,size_t xWriteBufferLen,co
 }
 
 BaseType_t CLI_OLEDdrawCircle( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString ){
-	int8_t *pcParameter1, *pcParameter2, *pcParameter3, *pcParameter4;
-	BaseType_t xParameter1StringLength, xParameter2StringLength, xParameter3StringLength, xParameter4StringLength;
+	int error = NULL;
+	static int8_t *pcParameter1, *pcParameter2, *pcParameter3, *pcParameter4;
+	static BaseType_t xParameter1StringLength, xParameter2StringLength, xParameter3StringLength, xParameter4StringLength;
 	pcParameter1 = FreeRTOS_CLIGetParameter(pcCommandString,1,&xParameter1StringLength);
 	pcParameter2 = FreeRTOS_CLIGetParameter(pcCommandString,2,&xParameter2StringLength);
 	pcParameter3 = FreeRTOS_CLIGetParameter(pcCommandString,3,&xParameter3StringLength);
@@ -362,20 +365,16 @@ BaseType_t CLI_OLEDdrawCircle( int8_t *pcWriteBuffer,size_t xWriteBufferLen,cons
 	uint8_t radius = atoi(pcParameter3);
 	uint8_t color = atoi(pcParameter4);
 	uint8_t mode = 0;
-	
-	int error = MicroOLEDclear(ALL);
-	if (ERROR_NONE != error)
-	{
-		snprintf(pcWriteBuffer,xWriteBufferLen, "Could not clear OLED!\r\n");
-		return pdFALSE;
-	}
+
 	
 	MicroOLEDcircle(x0, y0, radius, color, NORM);
+
 	error = MicroOLEDdisplay();
 	if (ERROR_NONE != error)
 	{
 		snprintf(pcWriteBuffer,xWriteBufferLen, "Could not display on OLED!\r\n");
 		return pdFALSE;
 	}
+	snprintf(pcWriteBuffer,xWriteBufferLen, "Circle Outline is drawn!\r\n");
 	return pdFALSE;
 }

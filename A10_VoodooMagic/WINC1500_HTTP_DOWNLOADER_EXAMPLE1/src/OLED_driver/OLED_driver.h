@@ -97,13 +97,13 @@ typedef enum CMD
 	uint8_t mosipinmask, sckpinmask, sspinmask, dcpinmask;
 	uint8_t foreColor, drawMode, fontWidth, fontHeight, fontType, fontStartChar, fontTotalChar, cursorX, cursorY;
 	uint16_t fontMapWidth;
-	static unsigned int  fontsPointer[];
+	const unsigned int *fontsPointer[];
 
 	int InitializeOLEDdriver(void);
 
 	// RAW LCD functions
 	int MicroOLEDcommand(uint8_t c);
-	void MicroOLEDdata(uint8_t c);
+	int MicroOLEDdata(uint8_t c);
 	void MicroOLEDsetColumnAddress(uint8_t add);
 	void MicroOLEDsetPageAddress(uint8_t add);
 
